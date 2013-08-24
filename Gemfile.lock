@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/bmabey/database_cleaner.git
-  revision: 0c053a75527b16765dac0b64e92a1cc35b6c529c
+  revision: e11d9f036e2390b1277f8c0c79312cc7ae79bce2
   specs:
     database_cleaner (1.1.1)
 
@@ -75,8 +75,7 @@ GEM
       nokogiri (>= 1.5.0)
     diff-lcs (1.2.4)
     erubis (2.7.0)
-    execjs (1.4.0)
-      multi_json (~> 1.0)
+    execjs (2.0.0)
     factory_girl (4.2.0)
       activesupport (>= 3.0.0)
     factory_girl_rails (4.2.1)
