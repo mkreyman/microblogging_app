@@ -40,6 +40,9 @@ describe "Authentication" do
       describe "followed by signout" do
         before { click_link "Sign out" }
         it { should have_link('Sign in') }
+        # per exersise 9.6.3
+        it { should_not have_link('Profile',      href: user_path(user)) }
+        it { should_not have_link('Settings',     href: edit_user_path(user)) }
       end
   	end
 
@@ -63,6 +66,20 @@ describe "Authentication" do
           it "should render the desired protected page" do
             expect(page).to have_title('Edit user')
           end
+
+          describe "when signing in again" do
+            before do
+              delete signout_path
+              visit signin_path
+              fill_in "Email",    with: user.email
+              fill_in "Password", with: user.password
+              click_button "Sign in"
+            end
+
+            it "should render the default (profile) page" do
+              expect(page).to have_title(user.name)
+            end
+          end
         end
       end
 
@@ -84,6 +101,19 @@ describe "Authentication" do
         end
 
       end  # End of "in the Users controller" block
+
+      describe "in the Microposts controller" do
+
+        describe "submitting to the create action" do
+          before { post microposts_path }
+          specify { expect(response).to redirect_to(signin_path) }
+        end
+
+        describe "submitting to the destroy action" do
+          before { delete micropost_path(FactoryGirl.create(:micropost)) }
+          specify { expect(response).to redirect_to(signin_path) }
+        end
+      end # end of "in the Microposts controller" block
     end  # End of "for non-signed-in users" block
 
     describe "as wrong user" do
@@ -113,6 +143,18 @@ describe "Authentication" do
         specify { expect(response).to redirect_to(root_url) }
       end
     end # End of "as non-admin user" block
+
+    describe "admins" do
+      let(:admin) { FactoryGirl.create(:admin) }
+
+      before { sign_in admin, no_capybara: true }
+
+      it "should not be able to delete themselves" do
+        expect { delete user_path(admin) }.not_to change(User, :count)
+      end
+    end
+
+   
 
   end # End of "authorization" block
 

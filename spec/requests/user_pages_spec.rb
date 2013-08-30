@@ -53,10 +53,19 @@ describe "User pages" do
 
   describe "profile page" do
     let(:user) { FactoryGirl.create(:user) }
+    let!(:m1) { FactoryGirl.create(:micropost, user: user, content: "Foo") }
+    let!(:m2) { FactoryGirl.create(:micropost, user: user, content: "Bar") }
+    
     before { visit user_path(user) }
 
     it { should have_content(user.name) }
     it { should have_title(user.name) }
+
+    describe "microposts" do
+      it { should have_content(m1.content) }
+      it { should have_content(m2.content) }
+      it { should have_content(user.microposts.count) }
+    end
   end
 
   describe "Sign Up page content" do
@@ -89,10 +98,10 @@ describe "User pages" do
 
     describe "with valid information" do
       before do
-        fill_in "Name",         with: "Example User"
-        fill_in "Email",        with: "user@example.com"
-        fill_in "Password",     with: "foobar"
-        fill_in "Confirmation", with: "foobar"
+        fill_in "Name",             with: "Example User"
+        fill_in "Email",            with: "user@example.com"
+        fill_in "Password",         with: "foobar"
+        fill_in "Confirm Password", with: "foobar"
       end
 
       it "should create a user" do
@@ -109,7 +118,7 @@ describe "User pages" do
       end
       
     end
-  end
+  end # End of 'signup' block
 
   describe "edit" do
     let(:user) { FactoryGirl.create(:user) }
@@ -148,8 +157,34 @@ describe "User pages" do
       specify { expect(user.reload.email).to eq new_email }
     end
 
+    describe "forbidden attributes" do
+      let(:params) do
+        { user: { admin: true, password: user.password,
+                  password_confirmation: user.password } }
+      end
+      before { patch user_path(user), params }
+      specify { expect(user.reload).not_to be_admin }
+    end
+
 
   end  # closing end for "edit" block
+
+  # 9.6 Exercises, ex.6
+  describe "sneaking around" do
+    let(:user) { FactoryGirl.create(:user) }
+    before { sign_in user }
+
+    describe "trying to create 'new' user again" do
+      before { visit signup_path }
+      specify { current_path.should eq "/" }
+    end
+   
+    describe "trying to view 'new' user again" do
+      before { visit new_user_path }
+      specify { current_path.should eq "/" }
+    end
+
+  end  # End of "sneaking around" block
 
 
 end  # closing 'end' for 'describe "User pages" do' block
